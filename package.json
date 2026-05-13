@@ -1,0 +1,50 @@
+{
+  "name": "jarvis",
+  "version": "0.1.0",
+  "description": "Local JARVIS-like AI desktop overlay",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "active-win": "^8.1.1",
+    "axios": "^1.7.0",
+    "electron-log": "^5.2.0",
+    "electron-store": "^8.2.0",
+    "framer-motion": "^11.3.0",
+    "openai": "^4.52.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "say": "^0.16.0",
+    "screenshot-desktop": "^1.15.4",
+    "systeminformation": "^5.23.5",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "postcss": "^8.4.40",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.4"
+  },
+  "build": {
+    "appId": "com.jarvis.overlay",
+    "productName": "JARVIS",
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icons/app-icon.ico"
+    }
+  }
+}
