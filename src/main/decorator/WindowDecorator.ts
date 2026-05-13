@@ -90,7 +90,9 @@ export class WindowDecorator {
         title: win.title ?? '',
         bounds,
       }
-      this.decoratorWin.webContents.send('decorator:update', updatePayload)
+      if (!this.decoratorWin.isDestroyed()) {
+        this.decoratorWin.webContents.send('decorator:update', updatePayload)
+      }
       for (const w of this.infoWindows) {
         if (!w.isDestroyed()) w.webContents.send('decorator:update', updatePayload)
       }
