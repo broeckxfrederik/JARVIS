@@ -2,20 +2,20 @@ import { z } from 'zod'
 
 export const ConfigSchema = z.object({
   ai: z.object({
-    provider: z.enum(['claude', 'openai', 'ollama']).default('claude'),
-    claude: z.object({
+    provider: z.enum(['gemini', 'groq', 'ollama']).default('gemini'),
+    providerChain: z.array(z.enum(['gemini', 'groq', 'ollama'])).default(['gemini', 'groq', 'ollama']),
+    gemini: z.object({
       apiKey: z.string().default(''),
-      model: z.string().default('claude-opus-4-5'),
+      model: z.string().default('gemini-1.5-flash'),
     }).default({}),
-    openai: z.object({
+    groq: z.object({
       apiKey: z.string().default(''),
-      model: z.string().default('gpt-4o'),
+      model: z.string().default('llama-3.3-70b-versatile'),
     }).default({}),
     ollama: z.object({
       baseUrl: z.string().default('http://localhost:11434'),
       model: z.string().default('llama3'),
     }).default({}),
-    providerChain: z.array(z.enum(['claude', 'openai', 'ollama'])).default(['claude', 'openai', 'ollama']),
     systemPrompt: z.string().default(
       'You are JARVIS, an intelligent AI assistant. Be concise, helpful, and slightly witty. ' +
       'Respond in short paragraphs. You can help with system tasks, answer questions, and control the computer.'

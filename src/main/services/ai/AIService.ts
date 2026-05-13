@@ -1,8 +1,8 @@
 import log from 'electron-log'
 import { AppConfig } from '../config/schema'
 import { AIProvider, Message, StreamChunk } from './AIProviderInterface'
-import { ClaudeProvider } from './ClaudeProvider'
-import { OpenAIProvider } from './OpenAIProvider'
+import { GeminiProvider } from './GeminiProvider'
+import { GroqProvider } from './GroqProvider'
 import { OllamaProvider } from './OllamaProvider'
 
 export class AIService {
@@ -83,11 +83,11 @@ export class AIService {
 
     for (const name of order) {
       switch (name) {
-        case 'claude':
-          chain.push(new ClaudeProvider(ai.claude.apiKey, ai.claude.model))
+        case 'gemini':
+          chain.push(new GeminiProvider(ai.gemini.apiKey, ai.gemini.model))
           break
-        case 'openai':
-          chain.push(new OpenAIProvider(ai.openai.apiKey, ai.openai.model))
+        case 'groq':
+          chain.push(new GroqProvider(ai.groq.apiKey, ai.groq.model))
           break
         case 'ollama':
           chain.push(new OllamaProvider(ai.ollama.baseUrl, ai.ollama.model))

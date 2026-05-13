@@ -6,8 +6,8 @@ interface StatusBarProps {
 }
 
 const PROVIDER_LABEL: Record<string, string> = {
-  claude: 'CLAUDE',
-  openai: 'GPT',
+  gemini: 'GEMINI',
+  groq: 'GROQ',
   ollama: 'LOCAL',
 }
 
