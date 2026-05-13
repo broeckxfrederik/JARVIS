@@ -17,10 +17,11 @@ export function useVoiceInput(): VoiceInputHook {
   const store = useJarvisStore()
 
   const startRecording = useCallback(async () => {
+    let stream: MediaStream | null = null
     try {
       isReadyRef.current = false
       setError(null)
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
@@ -43,6 +44,8 @@ export function useVoiceInput(): VoiceInputHook {
       setIsRecording(true)
       store.setState('listening')
     } catch (err) {
+      // Ensure acquired stream tracks are released if setup fails after getUserMedia
+      stream?.getTracks().forEach((t) => t.stop())
       const msg = err instanceof Error ? err.message : 'Microphone access denied'
       setError(msg)
       console.error('Failed to start recording:', err)

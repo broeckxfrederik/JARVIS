@@ -1,4 +1,4 @@
-import OpenAI from 'openai'
+import OpenAI, { toFile } from 'openai'
 
 export class STTService {
   private client: OpenAI | null = null
@@ -32,7 +32,7 @@ export class STTService {
     try {
       const buffer = Buffer.from(audioData)
       const transcription = await this.client.audio.transcriptions.create({
-        file: new File([buffer], 'audio.webm', { type: 'audio/webm' }),
+        file: await toFile(buffer, 'audio.webm', { type: 'audio/webm' }),
         model: this.model,
         language: 'en',
       })

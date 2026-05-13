@@ -88,7 +88,6 @@ app.whenReady().then(async () => {
     appLaunchService,
     overlayWindow,
     hudWindow,
-    decoratorWindow,
     windowDecorator,
     widgetManager,
     getOverlayVisible: () => overlayVisible,

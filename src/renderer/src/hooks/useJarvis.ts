@@ -103,6 +103,7 @@ export function useJarvis() {
       ]
 
       try {
+        if (!window.jarvis) throw new Error('Jarvis API not available')
         await window.jarvis.query(messagesForAI, `session-${Date.now()}`)
       } catch (err) {
         store.addMessage({
@@ -117,6 +118,7 @@ export function useJarvis() {
   )
 
   const speakText = useCallback(async (text: string) => {
+    if (!window.jarvis) return
     store.setState('speaking')
     await window.jarvis.speak(text)
     store.setState('idle')

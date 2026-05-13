@@ -10,6 +10,7 @@ import { WidgetPayload, WidgetSpec } from './types'
 export class WidgetManager {
   private planner: WidgetPlanner
   private generator: WidgetGenerator
+  private version = 0
 
   constructor(private canvasWindow: BrowserWindow, private config: AppConfig) {
     this.planner = new WidgetPlanner(config)
@@ -26,7 +27,11 @@ export class WidgetManager {
   async processQuery(query: string): Promise<void> {
     log.info('[WidgetManager] Planning widgets for:', query)
 
-    // Clear first — send clear regardless so stale widgets disappear
+    // Increment version before clear — renderer increments its counter on widget:clear,
+    // so subsequent widget:add events tagged with this version will be accepted.
+    this.version += 1
+    const currentVersion = this.version
+
     if (!this.canvasWindow.isDestroyed()) {
       this.canvasWindow.webContents.send('widget:clear')
     }
@@ -51,13 +56,13 @@ export class WidgetManager {
 
     // Process each widget and send to canvas as data becomes available
     for (const spec of specs) {
-      this.buildAndSend(spec).catch((err) =>
+      this.buildAndSend(spec, currentVersion).catch((err) =>
         log.error('[WidgetManager] Widget build error:', err)
       )
     }
   }
 
-  private async buildAndSend(spec: WidgetSpec): Promise<void> {
+  private async buildAndSend(spec: WidgetSpec, version: number): Promise<void> {
     const id = `${spec.type}-${Date.now()}-${Math.random().toString(36).slice(2)}`
     const payload: WidgetPayload = { id, spec }
 
@@ -81,7 +86,7 @@ export class WidgetManager {
     }
 
     if (!this.canvasWindow.isDestroyed()) {
-      this.canvasWindow.webContents.send('widget:add', payload)
+      this.canvasWindow.webContents.send('widget:add', { ...payload, _version: version })
     }
   }
 }

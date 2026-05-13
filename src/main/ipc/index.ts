@@ -22,7 +22,6 @@ interface IpcHandlerDeps {
   appLaunchService: AppLaunchService
   overlayWindow: BrowserWindow
   hudWindow: BrowserWindow
-  decoratorWindow: BrowserWindow
   windowDecorator: WindowDecorator
   widgetManager: WidgetManager
   getOverlayVisible: () => boolean
