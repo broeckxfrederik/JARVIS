@@ -130,7 +130,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     aiService.switchProvider(newConfig)
     shellService.updateConfig(newConfig)
     appLaunchService.updateConfig(newConfig)
-    sttService.updateApiKey(newConfig.ai.openai.apiKey)
+    sttService.updateApiKey(newConfig.ai.groq.apiKey)
     widgetManager.updateConfig(newConfig)
     return true
   })

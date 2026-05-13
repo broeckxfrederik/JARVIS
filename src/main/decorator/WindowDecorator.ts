@@ -1,5 +1,13 @@
 import { BrowserWindow } from 'electron'
 
+// Cached ESM import — active-win is ESM-only, import once to avoid
+// creating a new Promise on every 200ms poll tick.
+let activeWinModule: typeof import('active-win') | null = null
+async function getActiveWin() {
+  if (!activeWinModule) activeWinModule = await import('active-win')
+  return activeWinModule.default
+}
+
 export class WindowDecorator {
   private decoratorWin: BrowserWindow
   private pollInterval: NodeJS.Timeout | null = null
@@ -25,8 +33,8 @@ export class WindowDecorator {
     if (!this.enabled) return
 
     try {
-      const activeWin = await import('active-win')
-      const win = await activeWin.default()
+      const activeWin = await getActiveWin()
+      const win = await activeWin()
 
       if (!win) {
         if (this.decoratorWin.isVisible()) {

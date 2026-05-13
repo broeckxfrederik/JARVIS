@@ -31,17 +31,21 @@ export function useJarvis() {
       if (!isMountedRef.current) return
       const response = useJarvisStore.getState().currentResponse
       store.commitResponse()
-      store.setState('speaking')
-      window.jarvis.speak(response).finally(() => {
-        if (isMountedRef.current) store.setState('idle')
-      })
+      if (response.trim()) {
+        store.setState('speaking')
+        window.jarvis.speak(response).finally(() => {
+          if (isMountedRef.current) store.setState('idle')
+        })
+      } else {
+        store.setState('idle')
+      }
     })
     cleanups.push(cleanDone)
 
-    // Hotkey toggle
+    // Hotkey toggle — use getState() to avoid stale closure on isVisible
     const cleanHotkey = window.jarvis.onHotkeyToggle(() => {
       if (isMountedRef.current) {
-        const next = !store.isVisible
+        const next = !useJarvisStore.getState().isVisible
         store.setVisible(next)
       }
     })

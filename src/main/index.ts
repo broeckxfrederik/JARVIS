@@ -37,7 +37,7 @@ app.whenReady().then(async () => {
   // Create services
   const aiService = new AIService(config)
   const ttsService = new TTSService()
-  const sttService = new STTService(config.ai.openai.apiKey)
+  const sttService = new STTService(config.ai.groq.apiKey)
   const shellService = new ShellService(config)
   const volumeService = new VolumeService()
   const screenshotService = new ScreenshotService()

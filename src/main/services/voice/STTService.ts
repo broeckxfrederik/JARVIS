@@ -1,21 +1,19 @@
 import OpenAI from 'openai'
-import { Readable } from 'stream'
 
 export class STTService {
   private client: OpenAI | null = null
-  private apiKey: string
+  private model: string
 
-  constructor(apiKey: string) {
-    this.apiKey = apiKey
+  constructor(apiKey: string, baseURL = 'https://api.groq.com/openai/v1', model = 'whisper-large-v3') {
+    this.model = model
     if (apiKey && apiKey.length > 10) {
-      this.client = new OpenAI({ apiKey })
+      this.client = new OpenAI({ apiKey, baseURL })
     }
   }
 
-  updateApiKey(apiKey: string): void {
-    this.apiKey = apiKey
+  updateApiKey(apiKey: string, baseURL = 'https://api.groq.com/openai/v1'): void {
     if (apiKey && apiKey.length > 10) {
-      this.client = new OpenAI({ apiKey })
+      this.client = new OpenAI({ apiKey, baseURL })
     } else {
       this.client = null
     }
@@ -27,26 +25,20 @@ export class STTService {
 
   async transcribe(audioData: number[]): Promise<string> {
     if (!this.client) {
-      console.warn('STT: OpenAI API key not configured')
+      console.warn('[STT] No API key configured — transcription skipped')
       return ''
     }
 
     try {
       const buffer = Buffer.from(audioData)
-
-      // Create a readable stream from the buffer with a filename
-      const readable = Readable.from(buffer) as NodeJS.ReadableStream & { path: string; name: string }
-      readable.name = 'audio.webm'
-
       const transcription = await this.client.audio.transcriptions.create({
         file: new File([buffer], 'audio.webm', { type: 'audio/webm' }),
-        model: 'whisper-1',
+        model: this.model,
         language: 'en',
       })
-
-      return transcription.text || ''
+      return transcription.text ?? ''
     } catch (err) {
-      console.error('STT transcription error:', err)
+      console.error('[STT] Transcription error:', err)
       return ''
     }
   }
