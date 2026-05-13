@@ -1,4 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron'
+import log from 'electron-log'
 import { ConfigService } from '../services/config/ConfigService'
 import { AIService } from '../services/ai/AIService'
 import { TTSService } from '../services/voice/TTSService'
@@ -68,7 +69,9 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
         // Non-blocking widget planning
         const userMsg = messages.filter(m => m.role === 'user').at(-1)?.content ?? ''
         if (userMsg) {
-          widgetManager.processQuery(userMsg).catch(() => {})
+          widgetManager.processQuery(userMsg).catch((err) => {
+          log.warn('[IPC] Widget processing failed:', err)
+        })
         }
 
         return fullText

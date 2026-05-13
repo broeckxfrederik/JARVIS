@@ -20,7 +20,7 @@ declare global {
       executeCommand: (cmd: string) => Promise<{ stdout: string; stderr: string }>
       takeScreenshot: () => Promise<string>
       setVolume: (level: number) => Promise<boolean>
-      openApp: (name: string) => Promise<boolean>
+      openApp: (name: string) => Promise<{ success: boolean; message: string }>
 
       // Config
       getConfig: () => Promise<Record<string, unknown>>

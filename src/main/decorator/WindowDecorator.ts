@@ -27,6 +27,7 @@ export class WindowDecorator {
   }
 
   start(): void {
+    if (this.pollInterval) return
     this.pollInterval = setInterval(() => {
       if (this.isPolling) return
       this.isPolling = true
