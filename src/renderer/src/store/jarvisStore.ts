@@ -16,6 +16,7 @@ interface JarvisStore {
   isVisible: boolean
   inputText: string
   decoratorInfo: { appName: string; title: string } | null
+  activeProvider: string | null
 
   setState: (s: JarvisState) => void
   addMessage: (msg: Omit<Message, 'id'>) => void
@@ -25,6 +26,7 @@ interface JarvisStore {
   setVisible: (v: boolean) => void
   setInputText: (t: string) => void
   setDecoratorInfo: (info: { appName: string; title: string } | null) => void
+  setActiveProvider: (name: string | null) => void
 }
 
 export const useJarvisStore = create<JarvisStore>((set, get) => ({
@@ -34,6 +36,7 @@ export const useJarvisStore = create<JarvisStore>((set, get) => ({
   isVisible: false,
   inputText: '',
   decoratorInfo: null,
+  activeProvider: null,
 
   setState: (state) => set({ state }),
 
@@ -69,4 +72,6 @@ export const useJarvisStore = create<JarvisStore>((set, get) => ({
   setInputText: (inputText) => set({ inputText }),
 
   setDecoratorInfo: (decoratorInfo) => set({ decoratorInfo }),
+
+  setActiveProvider: (activeProvider) => set({ activeProvider }),
 }))

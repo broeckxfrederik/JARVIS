@@ -47,6 +47,12 @@ export function useJarvis() {
     })
     cleanups.push(cleanHotkey)
 
+    // Active provider (fires when query starts or fallback occurs)
+    const cleanProvider = window.jarvis.onProviderActive((name) => {
+      if (isMountedRef.current) store.setActiveProvider(name)
+    })
+    cleanups.push(cleanProvider)
+
     // Wake word
     const cleanWake = window.jarvis.onWakeWord(() => {
       if (isMountedRef.current) {

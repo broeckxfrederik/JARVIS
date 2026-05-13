@@ -1,3 +1,4 @@
+import log from 'electron-log'
 import { AppConfig } from '../config/schema'
 import { AIProvider, Message, StreamChunk } from './AIProviderInterface'
 import { ClaudeProvider } from './ClaudeProvider'
@@ -5,81 +6,118 @@ import { OpenAIProvider } from './OpenAIProvider'
 import { OllamaProvider } from './OllamaProvider'
 
 export class AIService {
-  private provider: AIProvider
   private config: AppConfig
-  public conversationHistory: Message[] = []
 
   constructor(config: AppConfig) {
     this.config = config
-    this.provider = this.createProvider(config)
-  }
-
-  private createProvider(config: AppConfig): AIProvider {
-    switch (config.ai.provider) {
-      case 'claude':
-        return new ClaudeProvider(config.ai.claude.apiKey, config.ai.claude.model)
-      case 'openai':
-        return new OpenAIProvider(config.ai.openai.apiKey, config.ai.openai.model)
-      case 'ollama':
-        return new OllamaProvider(config.ai.ollama.baseUrl, config.ai.ollama.model)
-      default:
-        return new ClaudeProvider(config.ai.claude.apiKey, config.ai.claude.model)
-    }
-  }
-
-  getProvider(): AIProvider {
-    return this.provider
   }
 
   switchProvider(config: AppConfig): void {
     this.config = config
-    this.provider = this.createProvider(config)
-  }
-
-  async query(
-    userMessage: string,
-    onChunk: (chunk: StreamChunk) => void
-  ): Promise<string> {
-    const systemMessage: Message = {
-      role: 'system',
-      content: this.config.ai.systemPrompt,
-    }
-
-    this.conversationHistory.push({
-      role: 'user',
-      content: userMessage,
-    })
-
-    const messages: Message[] = [systemMessage, ...this.conversationHistory]
-
-    const fullText = await this.provider.stream(messages, onChunk)
-
-    this.conversationHistory.push({
-      role: 'assistant',
-      content: fullText,
-    })
-
-    return fullText
-  }
-
-  async queryMessages(
-    messages: Message[],
-    onChunk: (chunk: StreamChunk) => void
-  ): Promise<string> {
-    const systemMessage: Message = {
-      role: 'system',
-      content: this.config.ai.systemPrompt,
-    }
-
-    const allMessages = [systemMessage, ...messages]
-    return this.provider.stream(allMessages, onChunk)
-  }
-
-  clearHistory(): void {
-    this.conversationHistory = []
   }
 
   isConfigured(): boolean {
-    return this.provider.isConfigured()
+    return this.buildChain().some((p) => p.isConfigured())
   }
+
+  /** Try each configured provider in order; fall back on rate-limit (429). */
+  async queryMessages(
+    messages: Message[],
+    onChunk: (chunk: StreamChunk) => void,
+    onProviderSwitch?: (providerName: string) => void
+  ): Promise<string> {
+    const systemMessage: Message = { role: 'system', content: this.config.ai.systemPrompt }
+    const allMessages = [systemMessage, ...messages]
+    const chain = this.buildChain()
+    const errors: string[] = []
+
+    for (let i = 0; i < chain.length; i++) {
+      const provider = chain[i]
+
+      if (!provider.isConfigured()) {
+        log.info(`[AIService] Skipping ${provider.name} — not configured`)
+        continue
+      }
+
+      log.info(`[AIService] Trying provider: ${provider.name}`)
+      onProviderSwitch?.(provider.name)
+
+      try {
+        return await provider.stream(allMessages, onChunk)
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err)
+
+        if (isRateLimited(err)) {
+          log.warn(`[AIService] ${provider.name} rate limited — trying next provider`)
+          errors.push(`${provider.name}: rate limited`)
+          continue
+        }
+
+        if (isUnconfigured(err)) {
+          log.warn(`[AIService] ${provider.name} not reachable — trying next provider`)
+          errors.push(`${provider.name}: unreachable`)
+          continue
+        }
+
+        // Unexpected error — surface immediately without cascading
+        log.error(`[AIService] ${provider.name} failed:`, errMsg)
+        throw err
+      }
+    }
+
+    const summary = errors.join('; ')
+    throw new Error(`All AI providers failed. ${summary}`)
+  }
+
+  private buildChain(): AIProvider[] {
+    const { ai } = this.config
+    const chain: AIProvider[] = []
+    const seen = new Set<string>()
+
+    // Primary provider first, then the rest of the chain
+    const order = [ai.provider, ...ai.providerChain].filter((name) => {
+      if (seen.has(name)) return false
+      seen.add(name)
+      return true
+    })
+
+    for (const name of order) {
+      switch (name) {
+        case 'claude':
+          chain.push(new ClaudeProvider(ai.claude.apiKey, ai.claude.model))
+          break
+        case 'openai':
+          chain.push(new OpenAIProvider(ai.openai.apiKey, ai.openai.model))
+          break
+        case 'ollama':
+          chain.push(new OllamaProvider(ai.ollama.baseUrl, ai.ollama.model))
+          break
+      }
+    }
+
+    return chain
+  }
+}
+
+function isRateLimited(err: unknown): boolean {
+  if (typeof err === 'object' && err !== null && 'status' in err) {
+    return (err as { status: number }).status === 429
+  }
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase()
+    return msg.includes('rate limit') || msg.includes('429') || msg.includes('too many requests')
+  }
+  return false
+}
+
+function isUnconfigured(err: unknown): boolean {
+  if (err instanceof Error) {
+    const msg = err.message.toLowerCase()
+    return (
+      msg.includes('econnrefused') ||    // Ollama not running
+      msg.includes('failed to fetch') ||
+      msg.includes('placeholder')        // blank API key slipped through
+    )
+  }
+  return false
 }

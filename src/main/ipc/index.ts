@@ -52,11 +52,15 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
       const sender = event.sender
 
       try {
-        const fullText = await aiService.queryMessages(messages, (chunk) => {
-          if (!chunk.done) {
-            sender.send('ai:stream-chunk', chunk.delta)
+        const fullText = await aiService.queryMessages(
+          messages,
+          (chunk) => {
+            if (!chunk.done) sender.send('ai:stream-chunk', chunk.delta)
+          },
+          (providerName) => {
+            sender.send('ai:provider-active', providerName)
           }
-        })
+        )
         sender.send('ai:stream-done')
         return fullText
       } catch (err) {

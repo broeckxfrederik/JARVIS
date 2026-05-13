@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { JarvisState } from '../../store/jarvisStore'
+import { JarvisState, useJarvisStore } from '../../store/jarvisStore'
 
 interface StatusBarProps {
   state: JarvisState
+}
+
+const PROVIDER_LABEL: Record<string, string> = {
+  claude: 'CLAUDE',
+  openai: 'GPT',
+  ollama: 'LOCAL',
 }
 
 const STATE_CONFIG: Record<JarvisState, { label: string; color: string; animation?: string }> = {
@@ -15,6 +21,7 @@ const STATE_CONFIG: Record<JarvisState, { label: string; color: string; animatio
 
 export function StatusBar({ state }: StatusBarProps) {
   const [time, setTime] = useState(() => new Date())
+  const activeProvider = useJarvisStore((s) => s.activeProvider)
   const cfg = STATE_CONFIG[state]
 
   useEffect(() => {
@@ -61,8 +68,23 @@ export function StatusBar({ state }: StatusBarProps) {
       {state === 'thinking' && <ThinkingDots />}
       {state === 'speaking' && <WaveBars />}
 
-      {/* Right: Version + time */}
-      <div style={{ display: 'flex', gap: 12 }}>
+      {/* Right: Active provider + version + time */}
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+        {activeProvider && (
+          <span
+            style={{
+              color: activeProvider === 'ollama' ? '#a78bfa' : 'rgba(0,212,255,0.7)',
+              border: '1px solid currentColor',
+              padding: '0 4px',
+              borderRadius: 2,
+              fontSize: '9px',
+              letterSpacing: '0.12em',
+            }}
+            title={`Active provider: ${activeProvider}`}
+          >
+            {PROVIDER_LABEL[activeProvider] ?? activeProvider.toUpperCase()}
+          </span>
+        )}
         <span>JARVIS v0.1</span>
         <span style={{ color: 'rgba(0,212,255,0.8)' }}>{timeStr}</span>
       </div>

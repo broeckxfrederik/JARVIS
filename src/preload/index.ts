@@ -20,6 +20,12 @@ const jarvisAPI = {
     return () => ipcRenderer.removeListener('ai:stream-done', handler)
   },
 
+  onProviderActive: (cb: (name: string) => void) => {
+    const handler = (_: unknown, name: string) => cb(name)
+    ipcRenderer.on('ai:provider-active', handler)
+    return () => ipcRenderer.removeListener('ai:provider-active', handler)
+  },
+
   // ─── Voice ────────────────────────────────────────────────────────────────
 
   transcribeAudio: (audioData: number[]) =>

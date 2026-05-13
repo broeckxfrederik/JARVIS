@@ -15,6 +15,7 @@ export const ConfigSchema = z.object({
       baseUrl: z.string().default('http://localhost:11434'),
       model: z.string().default('llama3'),
     }).default({}),
+    providerChain: z.array(z.enum(['claude', 'openai', 'ollama'])).default(['claude', 'openai', 'ollama']),
     systemPrompt: z.string().default(
       'You are JARVIS, an intelligent AI assistant. Be concise, helpful, and slightly witty. ' +
       'Respond in short paragraphs. You can help with system tasks, answer questions, and control the computer.'
