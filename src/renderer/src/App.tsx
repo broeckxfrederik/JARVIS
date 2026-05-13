@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { MainOverlay } from './components/hud/MainOverlay'
 import { MiniHUD } from './components/hud/MiniHUD'
 import { WindowFrame } from './components/decorator/WindowFrame'
+import { WidgetCanvas } from './components/widgets/WidgetCanvas'
 import { useJarvisStore } from './store/jarvisStore'
 
-type View = 'overlay' | 'hud' | 'decorator'
+type View = 'overlay' | 'hud' | 'decorator' | 'canvas'
 
 export default function App() {
   const [view, setView] = useState<View>('overlay')
@@ -14,6 +15,7 @@ export default function App() {
     const hash = window.location.hash.replace('#', '')
     if (hash === 'hud') setView('hud')
     else if (hash === 'decorator') setView('decorator')
+    else if (hash === 'canvas') setView('canvas')
     else setView('overlay')
   }, [])
 
@@ -30,6 +32,10 @@ export default function App() {
 
   if (view === 'hud') {
     return <MiniHUD />
+  }
+
+  if (view === 'canvas') {
+    return <WidgetCanvas />
   }
 
   if (view === 'decorator') {

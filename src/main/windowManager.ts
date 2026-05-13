@@ -61,6 +61,37 @@ export function createHUDWindow(): BrowserWindow {
   return win
 }
 
+export function createWidgetCanvasWindow(): BrowserWindow {
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize
+  const canvasWidth = 380
+  const canvasHeight = Math.round(height * 0.82)
+  const x = width - canvasWidth - 10
+  const y = Math.round((height - canvasHeight) / 2)
+
+  const win = new BrowserWindow({
+    width: canvasWidth,
+    height: canvasHeight,
+    x, y,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    focusable: true,
+    hasShadow: false,
+    show: false,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: getPreloadPath(),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      webSecurity: false, // needed to allow iframe data URLs and local content
+    },
+  })
+  win.setAlwaysOnTop(true, 'screen-saver')
+  return win
+}
+
 export function createDecoratorWindow(): BrowserWindow {
   const { width, height } = screen.getPrimaryDisplay().bounds
   const win = new BrowserWindow({

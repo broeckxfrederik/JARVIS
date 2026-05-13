@@ -1,7 +1,7 @@
 import { app, globalShortcut, BrowserWindow } from 'electron'
 import { join } from 'path'
 import log from 'electron-log'
-import { createOverlayWindow, createHUDWindow, createDecoratorWindow } from './windowManager'
+import { createOverlayWindow, createHUDWindow, createDecoratorWindow, createWidgetCanvasWindow } from './windowManager'
 import { ConfigService } from './services/config/ConfigService'
 import { AIService } from './services/ai/AIService'
 import { TTSService } from './services/voice/TTSService'
@@ -11,6 +11,7 @@ import { VolumeService } from './services/system/VolumeService'
 import { ScreenshotService } from './services/system/ScreenshotService'
 import { AppLaunchService } from './services/system/AppLaunchService'
 import { WindowDecorator } from './decorator/WindowDecorator'
+import { WidgetManager } from './widgets/WidgetManager'
 import { registerIpcHandlers } from './ipc/index'
 import { createTray } from './trayManager'
 
@@ -31,6 +32,7 @@ app.whenReady().then(async () => {
   const overlayWindow = createOverlayWindow()
   const hudWindow = createHUDWindow()
   const decoratorWindow = createDecoratorWindow()
+  const canvasWindow = createWidgetCanvasWindow()
 
   // Create services
   const aiService = new AIService(config)
@@ -41,6 +43,7 @@ app.whenReady().then(async () => {
   const screenshotService = new ScreenshotService()
   const appLaunchService = new AppLaunchService(config)
   const windowDecorator = new WindowDecorator(decoratorWindow)
+  const widgetManager = new WidgetManager(canvasWindow, config)
 
   let overlayVisible = false
 
@@ -87,6 +90,7 @@ app.whenReady().then(async () => {
     hudWindow,
     decoratorWindow,
     windowDecorator,
+    widgetManager,
     getOverlayVisible: () => overlayVisible,
     setOverlayVisible: (v) => { overlayVisible = v },
   })
@@ -107,11 +111,13 @@ app.whenReady().then(async () => {
       await overlayWindow.loadURL(VITE_DEV_SERVER_URL)
       await hudWindow.loadURL(`${VITE_DEV_SERVER_URL}#hud`)
       await decoratorWindow.loadURL(`${VITE_DEV_SERVER_URL}#decorator`)
+      await canvasWindow.loadURL(`${VITE_DEV_SERVER_URL}#canvas`)
     } else {
       const rendererIndex = join(__dirname, '../renderer/index.html')
       await overlayWindow.loadFile(rendererIndex)
       await hudWindow.loadFile(rendererIndex, { hash: 'hud' })
       await decoratorWindow.loadFile(rendererIndex, { hash: 'decorator' })
+      await canvasWindow.loadFile(rendererIndex, { hash: 'canvas' })
     }
 
     // Open devtools in development

@@ -85,6 +85,20 @@ const jarvisAPI = {
 
   toggleDecorator: (enabled: boolean) =>
     ipcRenderer.invoke('decorator:toggle', enabled),
+
+  // ─── Widgets ──────────────────────────────────────────────────────────────
+
+  onWidgetAdd: (cb: (payload: unknown) => void) => {
+    const handler = (_: unknown, payload: unknown) => cb(payload)
+    ipcRenderer.on('widget:add', handler)
+    return () => ipcRenderer.removeListener('widget:add', handler)
+  },
+
+  onWidgetClear: (cb: () => void) => {
+    const handler = () => cb()
+    ipcRenderer.on('widget:clear', handler)
+    return () => ipcRenderer.removeListener('widget:clear', handler)
+  },
 }
 
 contextBridge.exposeInMainWorld('jarvis', jarvisAPI)

@@ -9,6 +9,7 @@ import { ScreenshotService } from '../services/system/ScreenshotService'
 import { AppLaunchService } from '../services/system/AppLaunchService'
 import { WindowDecorator } from '../decorator/WindowDecorator'
 import { Message } from '../services/ai/AIProviderInterface'
+import { WidgetManager } from '../widgets/WidgetManager'
 
 interface IpcHandlerDeps {
   configService: ConfigService
@@ -23,6 +24,7 @@ interface IpcHandlerDeps {
   hudWindow: BrowserWindow
   decoratorWindow: BrowserWindow
   windowDecorator: WindowDecorator
+  widgetManager: WidgetManager
   getOverlayVisible: () => boolean
   setOverlayVisible: (v: boolean) => void
 }
@@ -40,6 +42,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     overlayWindow,
     hudWindow,
     windowDecorator,
+    widgetManager,
     getOverlayVisible,
     setOverlayVisible,
   } = deps
@@ -62,6 +65,13 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
           }
         )
         sender.send('ai:stream-done')
+
+        // Non-blocking widget planning
+        const userMsg = messages.filter(m => m.role === 'user').at(-1)?.content ?? ''
+        if (userMsg) {
+          widgetManager.processQuery(userMsg).catch(() => {})
+        }
+
         return fullText
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
@@ -121,6 +131,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     shellService.updateConfig(newConfig)
     appLaunchService.updateConfig(newConfig)
     sttService.updateApiKey(newConfig.ai.openai.apiKey)
+    widgetManager.updateConfig(newConfig)
     return true
   })
 
