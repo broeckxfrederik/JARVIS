@@ -1,6 +1,19 @@
 import Store from 'electron-store'
 import { AppConfig, ConfigSchema } from './schema'
 
+function deepMerge(base: Record<string, unknown>, updates: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...base }
+  for (const [key, value] of Object.entries(updates)) {
+    if (value !== null && typeof value === 'object' && !Array.isArray(value) &&
+        typeof result[key] === 'object' && result[key] !== null) {
+      result[key] = deepMerge(result[key] as Record<string, unknown>, value as Record<string, unknown>)
+    } else {
+      result[key] = value
+    }
+  }
+  return result
+}
+
 export class ConfigService {
   private store: Store<AppConfig>
 
@@ -28,7 +41,9 @@ export class ConfigService {
   }
 
   set(partial: Partial<AppConfig>): void {
-    for (const [key, value] of Object.entries(partial)) {
+    const current = this.get()
+    const merged = deepMerge(current, partial)
+    for (const [key, value] of Object.entries(merged)) {
       this.store.set(key, value)
     }
   }

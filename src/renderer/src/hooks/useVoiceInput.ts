@@ -13,10 +13,12 @@ export function useVoiceInput(): VoiceInputHook {
   const [error, setError] = useState<string | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
+  const isReadyRef = useRef(false) // true only after MediaRecorder is fully set up
   const store = useJarvisStore()
 
   const startRecording = useCallback(async () => {
     try {
+      isReadyRef.current = false
       setError(null)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
 
@@ -37,6 +39,7 @@ export function useVoiceInput(): VoiceInputHook {
       }
 
       recorder.start(100) // collect data every 100ms
+      isReadyRef.current = true
       setIsRecording(true)
       store.setState('listening')
     } catch (err) {
@@ -48,6 +51,11 @@ export function useVoiceInput(): VoiceInputHook {
 
   const stopRecording = useCallback(async (): Promise<string> => {
     return new Promise((resolve) => {
+      if (!isReadyRef.current) {
+        // startRecording hasn't finished its async setup yet
+        resolve('')
+        return
+      }
       const recorder = mediaRecorderRef.current
       if (!recorder || recorder.state === 'inactive') {
         setIsRecording(false)

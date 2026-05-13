@@ -38,6 +38,9 @@ export class GeminiProvider implements AIProvider {
 
   async stream(messages: Message[], onChunk: (chunk: StreamChunk) => void): Promise<string> {
     const { systemInstruction, history, lastUserMessage } = this.splitMessages(messages)
+    if (!lastUserMessage.trim()) {
+      throw new Error('GeminiProvider: no user message to send')
+    }
     const genModel = this.genAI.getGenerativeModel({
       model: this.model,
       systemInstruction,

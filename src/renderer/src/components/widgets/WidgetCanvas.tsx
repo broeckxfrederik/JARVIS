@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { WeatherWidget } from './WeatherWidget'
 import { MapWidget } from './MapWidget'
 import { InfoWidget } from './InfoWidget'
@@ -21,15 +21,23 @@ interface WidgetPayload {
 
 export function WidgetCanvas() {
   const [widgets, setWidgets] = useState<WidgetPayload[]>([])
+  // Monotonic version incremented on each clear; widget:add events carry the
+  // version at the time they were dispatched so stale adds are discarded.
+  const versionRef = useRef(0)
 
   useEffect(() => {
     if (!window.jarvis) return
 
-    const cleanAdd = window.jarvis.onWidgetAdd((payload: unknown) => {
-      setWidgets(prev => [...prev, payload as WidgetPayload])
-    })
     const cleanClear = window.jarvis.onWidgetClear(() => {
+      versionRef.current += 1
       setWidgets([])
+    })
+
+    const cleanAdd = window.jarvis.onWidgetAdd((payload: unknown) => {
+      const p = payload as WidgetPayload & { _version?: number }
+      // Drop widgets from a previous query cycle
+      if (p._version !== undefined && p._version !== versionRef.current) return
+      setWidgets(prev => [...prev, p])
     })
 
     return () => {

@@ -100,8 +100,8 @@ app.whenReady().then(async () => {
     windowDecorator.start()
   }
 
-  // Create system tray
-  createTray(toggleOverlay, () => app.quit())
+  // Create system tray — must store reference to prevent GC on some platforms
+  const _tray = createTray(toggleOverlay, () => app.quit())
 
   // Load renderer URLs
   const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']

@@ -93,9 +93,12 @@ export function useJarvis() {
       store.setState('thinking')
       store.clearCurrentResponse()
 
-      // Build messages for AI: prior history + the new user message (no duplication)
+      // Build messages for AI: prior history (no system messages — main process prepends one)
+      // + the new user message. Filter system role to prevent duplication.
       const messagesForAI: Pick<Message, 'role' | 'content'>[] = [
-        ...historySnapshot.map((m) => ({ role: m.role, content: m.content })),
+        ...historySnapshot
+          .filter((m) => m.role !== 'system')
+          .map((m) => ({ role: m.role, content: m.content })),
         { role: 'user', content: text },
       ]
 

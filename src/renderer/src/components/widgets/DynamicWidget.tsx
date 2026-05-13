@@ -6,11 +6,20 @@ export function DynamicWidget({ html }: { html?: string }) {
   useEffect(() => {
     const iframe = iframeRef.current
     if (!iframe || !html) return
-    const doc = iframe.contentDocument
-    if (doc) {
-      doc.open()
-      doc.write(html)
-      doc.close()
+
+    const writeContent = () => {
+      const doc = iframe.contentDocument
+      if (doc) {
+        doc.open()
+        doc.write(html)
+        doc.close()
+      }
+    }
+
+    if (iframe.contentDocument?.readyState === 'complete') {
+      writeContent()
+    } else {
+      iframe.onload = writeContent
     }
   }, [html])
 

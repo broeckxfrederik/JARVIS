@@ -26,23 +26,27 @@ export class WidgetManager {
   async processQuery(query: string): Promise<void> {
     log.info('[WidgetManager] Planning widgets for:', query)
 
-    // Clear existing widgets first
-    this.canvasWindow.webContents.send('widget:clear')
-    this.canvasWindow.show()
+    // Clear first — send clear regardless so stale widgets disappear
+    if (!this.canvasWindow.isDestroyed()) {
+      this.canvasWindow.webContents.send('widget:clear')
+    }
 
     let specs: WidgetSpec[]
     try {
       specs = await this.planner.plan(query)
     } catch (err) {
       log.warn('[WidgetManager] Planning failed:', err)
+      if (!this.canvasWindow.isDestroyed()) this.canvasWindow.hide()
       return
     }
 
     if (specs.length === 0) {
-      this.canvasWindow.hide()
+      if (!this.canvasWindow.isDestroyed()) this.canvasWindow.hide()
       return
     }
 
+    // Only show canvas once we know there are widgets to display
+    if (!this.canvasWindow.isDestroyed()) this.canvasWindow.show()
     log.info('[WidgetManager] Planned widgets:', specs.map(s => s.type))
 
     // Process each widget and send to canvas as data becomes available

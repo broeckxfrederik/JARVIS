@@ -12,11 +12,16 @@ export default function App() {
   const decoratorInfo = useJarvisStore((s) => s.decoratorInfo)
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
-    if (hash === 'hud') setView('hud')
-    else if (hash === 'decorator') setView('decorator')
-    else if (hash === 'canvas') setView('canvas')
-    else setView('overlay')
+    const updateView = () => {
+      const hash = window.location.hash.replace('#', '')
+      if (hash === 'hud') setView('hud')
+      else if (hash === 'decorator') setView('decorator')
+      else if (hash === 'canvas') setView('canvas')
+      else setView('overlay')
+    }
+    updateView()
+    window.addEventListener('hashchange', updateView)
+    return () => window.removeEventListener('hashchange', updateView)
   }, [])
 
   // Wire decorator updates for the decorator window

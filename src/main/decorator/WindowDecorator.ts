@@ -13,6 +13,7 @@ export class WindowDecorator {
   private pollInterval: NodeJS.Timeout | null = null
   private lastBoundsKey = ''
   private enabled = true
+  private isPolling = false
 
   constructor(decoratorWin: BrowserWindow) {
     this.decoratorWin = decoratorWin
@@ -26,7 +27,11 @@ export class WindowDecorator {
   }
 
   start(): void {
-    this.pollInterval = setInterval(() => this.poll(), 200)
+    this.pollInterval = setInterval(() => {
+      if (this.isPolling) return
+      this.isPolling = true
+      this.poll().finally(() => { this.isPolling = false })
+    }, 200)
   }
 
   private async poll(): Promise<void> {

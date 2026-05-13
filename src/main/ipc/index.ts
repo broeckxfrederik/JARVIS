@@ -58,13 +58,13 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
         const fullText = await aiService.queryMessages(
           messages,
           (chunk) => {
-            if (!chunk.done) sender.send('ai:stream-chunk', chunk.delta)
+            if (!chunk.done && !sender.isDestroyed()) sender.send('ai:stream-chunk', chunk.delta)
           },
           (providerName) => {
-            sender.send('ai:provider-active', providerName)
+            if (!sender.isDestroyed()) sender.send('ai:provider-active', providerName)
           }
         )
-        sender.send('ai:stream-done')
+        if (!sender.isDestroyed()) sender.send('ai:stream-done')
 
         // Non-blocking widget planning
         const userMsg = messages.filter(m => m.role === 'user').at(-1)?.content ?? ''
@@ -75,7 +75,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
         return fullText
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        sender.send('ai:stream-done')
+        if (!sender.isDestroyed()) sender.send('ai:stream-done')
         throw new Error(message)
       }
     }
