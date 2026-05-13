@@ -10,13 +10,15 @@ async function getActiveWin() {
 
 export class WindowDecorator {
   private decoratorWin: BrowserWindow
+  private infoWindows: BrowserWindow[]
   private pollInterval: NodeJS.Timeout | null = null
   private lastBoundsKey = ''
   private enabled = true
   private isPolling = false
 
-  constructor(decoratorWin: BrowserWindow) {
+  constructor(decoratorWin: BrowserWindow, infoWindows: BrowserWindow[] = []) {
     this.decoratorWin = decoratorWin
+    this.infoWindows = infoWindows
   }
 
   setEnabled(enabled: boolean): void {
@@ -83,11 +85,15 @@ export class WindowDecorator {
         this.decoratorWin.show()
       }
 
-      this.decoratorWin.webContents.send('decorator:update', {
+      const updatePayload = {
         appName: win.owner?.name ?? 'Unknown',
         title: win.title ?? '',
         bounds,
-      })
+      }
+      this.decoratorWin.webContents.send('decorator:update', updatePayload)
+      for (const w of this.infoWindows) {
+        if (!w.isDestroyed()) w.webContents.send('decorator:update', updatePayload)
+      }
     } catch {
       // active-win may fail on some windows; ignore silently
     }
