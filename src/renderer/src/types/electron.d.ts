@@ -17,7 +17,7 @@ declare global {
       onVoiceState: (cb: (state: string) => void) => () => void
 
       // System
-      executeCommand: (cmd: string) => Promise<{ stdout: string; stderr: string }>
+      executeCommand: (cmd: string) => Promise<{ stdout: string; stderr: string; exitCode: number | null; success: boolean }>
       takeScreenshot: () => Promise<string>
       setVolume: (level: number) => Promise<boolean>
       openApp: (name: string) => Promise<{ success: boolean; message: string }>

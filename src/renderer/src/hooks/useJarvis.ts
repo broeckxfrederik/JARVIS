@@ -33,9 +33,11 @@ export function useJarvis() {
       store.commitResponse()
       if (response.trim()) {
         store.setState('speaking')
-        window.jarvis.speak(response).finally(() => {
-          if (isMountedRef.current) store.setState('idle')
-        })
+        window.jarvis.speak(response)
+          .catch(() => {})
+          .finally(() => {
+            if (isMountedRef.current) store.setState('idle')
+          })
       } else {
         store.setState('idle')
       }
