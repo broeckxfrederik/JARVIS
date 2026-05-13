@@ -26,12 +26,15 @@ export function useJarvis() {
     })
     cleanups.push(cleanChunk)
 
-    // Stream done handler
+    // Stream done handler — commit response and speak it
     const cleanDone = window.jarvis.onStreamDone(() => {
-      if (isMountedRef.current) {
-        store.commitResponse()
-        store.setState('idle')
-      }
+      if (!isMountedRef.current) return
+      const response = useJarvisStore.getState().currentResponse
+      store.commitResponse()
+      store.setState('speaking')
+      window.jarvis.speak(response).finally(() => {
+        if (isMountedRef.current) store.setState('idle')
+      })
     })
     cleanups.push(cleanDone)
 
@@ -73,24 +76,21 @@ export function useJarvis() {
     async (text: string) => {
       if (!text.trim()) return
 
-      store.addMessage({
-        role: 'user',
-        content: text,
-        timestamp: Date.now(),
-      })
+      // Snapshot history BEFORE adding the new message to avoid stale closure issues
+      const historySnapshot = useJarvisStore.getState().messages
+
+      store.addMessage({ role: 'user', content: text, timestamp: Date.now() })
       store.setState('thinking')
       store.clearCurrentResponse()
 
-      const messages: Message[] = [
-        ...store.messages,
-        { id: 'pending', role: 'user', content: text, timestamp: Date.now() },
+      // Build messages for AI: prior history + the new user message (no duplication)
+      const messagesForAI: Pick<Message, 'role' | 'content'>[] = [
+        ...historySnapshot.map((m) => ({ role: m.role, content: m.content })),
+        { role: 'user', content: text },
       ]
 
       try {
-        await window.jarvis.query(
-          messages.map((m) => ({ role: m.role, content: m.content })),
-          `session-${Date.now()}`
-        )
+        await window.jarvis.query(messagesForAI, `session-${Date.now()}`)
       } catch (err) {
         store.addMessage({
           role: 'assistant',
