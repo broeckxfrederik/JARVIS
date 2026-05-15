@@ -44,14 +44,15 @@ export function useJarvis() {
     })
     cleanups.push(cleanDone)
 
-    // Hotkey toggle — use getState() to avoid stale closure on isVisible
-    window.jarvis.rendererLog('useJarvis: registering onHotkeyToggle listener')
-    const cleanHotkey = window.jarvis.onHotkeyToggle(() => {
+    // Hotkey toggle — main sends explicit boolean; renderer just applies it.
+    console.log('[useJarvis] registering onHotkeyToggle listener')
+    try { window.jarvis.rendererLog?.('useJarvis: registering onHotkeyToggle listener') } catch {}
+    const cleanHotkey = window.jarvis.onHotkeyToggle((visible: boolean) => {
       const before = useJarvisStore.getState().isVisible
-      const next = !before
-      window.jarvis.rendererLog(`hotkey:toggle received. isMounted=${isMountedRef.current}, isVisible BEFORE=${before}, NEXT=${next}`)
+      console.log(`[useJarvis] hotkey:toggle received. payload=${visible} isVisible BEFORE=${before}`)
+      try { window.jarvis.rendererLog?.(`hotkey:toggle received. payload=${visible} isVisible BEFORE=${before}`) } catch {}
       if (isMountedRef.current) {
-        store.setVisible(next)
+        store.setVisible(visible)
       }
     })
     cleanups.push(cleanHotkey)

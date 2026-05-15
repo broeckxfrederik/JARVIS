@@ -31,7 +31,7 @@ declare global {
       setClickThrough: (enabled: boolean) => void
       toggleWindow: () => void
       rendererLog: (msg: string) => void
-      onHotkeyToggle: (cb: () => void) => () => void
+      onHotkeyToggle: (cb: (visible: boolean) => void) => () => void
 
       // Decorator
       onDecoratorUpdate: (cb: (info: { appName: string; title: string }) => void) => () => void

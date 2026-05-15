@@ -151,23 +151,22 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
 
   ipcMain.on('window:toggle', () => {
     const visible = getOverlayVisible()
-    log.info(`[IPC window:toggle] received. overlayVisible BEFORE=${visible}, window.isVisible()=${overlayWindow.isVisible()}`)
-    if (visible) {
-      log.info('[IPC window:toggle] CLOSING: sending hotkey:toggle then hide()')
-      overlayWindow.webContents.send('hotkey:toggle')
-      hudWindow.webContents.send('hotkey:toggle')
-      overlayWindow.hide()
-      overlayWindow.setIgnoreMouseEvents(true, { forward: true })
-    } else {
-      log.info('[IPC window:toggle] OPENING: show() then sending hotkey:toggle')
+    const next = !visible
+    log.info(`[IPC window:toggle] BEFORE=${visible} NEXT=${next} window.isVisible()=${overlayWindow.isVisible()}`)
+    if (next) {
       overlayWindow.show()
       overlayWindow.focus()
       overlayWindow.setIgnoreMouseEvents(false)
-      overlayWindow.webContents.send('hotkey:toggle')
-      hudWindow.webContents.send('hotkey:toggle')
+      overlayWindow.webContents.send('hotkey:toggle', next)
+      hudWindow.webContents.send('hotkey:toggle', next)
+    } else {
+      overlayWindow.webContents.send('hotkey:toggle', next)
+      hudWindow.webContents.send('hotkey:toggle', next)
+      overlayWindow.hide()
+      overlayWindow.setIgnoreMouseEvents(true, { forward: true })
     }
-    setOverlayVisible(!visible)
-    log.info(`[IPC window:toggle] done. overlayVisible AFTER=${!visible}, window.isVisible()=${overlayWindow.isVisible()}`)
+    setOverlayVisible(next)
+    log.info(`[IPC window:toggle] done. overlayVisible=${next}`)
   })
 
   // ─── Decorator ──────────────────────────────────────────────────────────────

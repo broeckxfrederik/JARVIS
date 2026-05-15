@@ -73,8 +73,8 @@ const jarvisAPI = {
 
   rendererLog: (msg: string) => ipcRenderer.send('renderer:log', msg),
 
-  onHotkeyToggle: (cb: () => void) => {
-    const handler = () => cb()
+  onHotkeyToggle: (cb: (visible: boolean) => void) => {
+    const handler = (_: unknown, visible: boolean) => cb(visible)
     ipcRenderer.on('hotkey:toggle', handler)
     return () => ipcRenderer.removeListener('hotkey:toggle', handler)
   },
