@@ -13,6 +13,7 @@ export function MainOverlay() {
 
   // Enable/disable click-through based on visibility
   useEffect(() => {
+    window.jarvis?.rendererLog(`MainOverlay isVisible effect ran. isVisible=${jarvis.isVisible}`)
     if (typeof window !== 'undefined' && window.jarvis) {
       if (jarvis.isVisible) {
         window.jarvis.setClickThrough(false)
@@ -48,6 +49,7 @@ export function MainOverlay() {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
+        window.jarvis?.rendererLog(`Escape pressed. isVisible=${jarvis.isVisible}`)
         window.jarvis?.toggleWindow()
       }
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -125,7 +127,10 @@ export function MainOverlay() {
 
           {/* Close button */}
           <button
-            onClick={() => window.jarvis?.toggleWindow()}
+            onClick={() => {
+              window.jarvis?.rendererLog(`Close button clicked. isVisible=${jarvis.isVisible}`)
+              window.jarvis?.toggleWindow()
+            }}
             style={{
               background: 'none',
               border: '1px solid rgba(0,212,255,0.3)',

@@ -71,6 +71,8 @@ const jarvisAPI = {
 
   toggleWindow: () => ipcRenderer.send('window:toggle'),
 
+  rendererLog: (msg: string) => ipcRenderer.send('renderer:log', msg),
+
   onHotkeyToggle: (cb: () => void) => {
     const handler = () => cb()
     ipcRenderer.on('hotkey:toggle', handler)

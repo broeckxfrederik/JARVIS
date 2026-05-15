@@ -94,14 +94,15 @@ app.whenReady().then(async () => {
   let overlayVisible = false
 
   const toggleOverlay = () => {
+    log.info(`[Overlay] toggleOverlay called. overlayVisible BEFORE=${overlayVisible}, window.isVisible()=${overlayWindow.isVisible()}, isDestroyed=${overlayWindow.isDestroyed()}`)
     if (overlayVisible) {
-      // Closing: send event BEFORE hiding so the renderer receives it reliably
+      log.info('[Overlay] CLOSING: sending hotkey:toggle then hide()')
       overlayWindow.webContents.send('hotkey:toggle')
       hudWindow.webContents.send('hotkey:toggle')
       overlayWindow.hide()
       overlayWindow.setIgnoreMouseEvents(true, { forward: true })
     } else {
-      // Opening: show first so the renderer is active when the event arrives
+      log.info('[Overlay] OPENING: show() then sending hotkey:toggle')
       overlayWindow.show()
       overlayWindow.focus()
       overlayWindow.setIgnoreMouseEvents(false)
@@ -109,6 +110,7 @@ app.whenReady().then(async () => {
       hudWindow.webContents.send('hotkey:toggle')
     }
     overlayVisible = !overlayVisible
+    log.info(`[Overlay] toggleOverlay done. overlayVisible AFTER=${overlayVisible}, window.isVisible()=${overlayWindow.isVisible()}`)
   }
 
   // Register global hotkeys

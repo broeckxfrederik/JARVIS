@@ -137,6 +137,12 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     return true
   })
 
+  // ─── Renderer logs (forwarded to main terminal) ─────────────────────────────
+
+  ipcMain.on('renderer:log', (_event, msg: string) => {
+    log.info(`[Renderer] ${msg}`)
+  })
+
   // ─── Window ─────────────────────────────────────────────────────────────────
 
   ipcMain.on('window:click-through', (_event, enabled: boolean) => {
@@ -145,14 +151,15 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
 
   ipcMain.on('window:toggle', () => {
     const visible = getOverlayVisible()
+    log.info(`[IPC window:toggle] received. overlayVisible BEFORE=${visible}, window.isVisible()=${overlayWindow.isVisible()}`)
     if (visible) {
-      // Closing: send event BEFORE hiding so the renderer receives it reliably
+      log.info('[IPC window:toggle] CLOSING: sending hotkey:toggle then hide()')
       overlayWindow.webContents.send('hotkey:toggle')
       hudWindow.webContents.send('hotkey:toggle')
       overlayWindow.hide()
       overlayWindow.setIgnoreMouseEvents(true, { forward: true })
     } else {
-      // Opening: show first so the renderer is active when the event arrives
+      log.info('[IPC window:toggle] OPENING: show() then sending hotkey:toggle')
       overlayWindow.show()
       overlayWindow.focus()
       overlayWindow.setIgnoreMouseEvents(false)
@@ -160,6 +167,7 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
       hudWindow.webContents.send('hotkey:toggle')
     }
     setOverlayVisible(!visible)
+    log.info(`[IPC window:toggle] done. overlayVisible AFTER=${!visible}, window.isVisible()=${overlayWindow.isVisible()}`)
   })
 
   // ─── Decorator ──────────────────────────────────────────────────────────────
