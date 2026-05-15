@@ -143,8 +143,16 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     overlayWindow.setIgnoreMouseEvents(enabled, { forward: true })
   })
 
+  ipcMain.on('window:hide', () => {
+    overlayWindow.hide()
+    overlayWindow.setIgnoreMouseEvents(true, { forward: true })
+    setOverlayVisible(false)
+    if (!overlayWindow.isDestroyed()) overlayWindow.webContents.send('overlay:visible', false)
+  })
+
   ipcMain.on('window:toggle', () => {
     const visible = getOverlayVisible()
+    const next = !visible
     if (visible) {
       overlayWindow.hide()
       overlayWindow.setIgnoreMouseEvents(true, { forward: true })
@@ -153,8 +161,8 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
       overlayWindow.focus()
       overlayWindow.setIgnoreMouseEvents(false)
     }
-    setOverlayVisible(!visible)
-    overlayWindow.webContents.send('hotkey:toggle')
+    setOverlayVisible(next)
+    if (!overlayWindow.isDestroyed()) overlayWindow.webContents.send('overlay:visible', next)
     hudWindow.webContents.send('hotkey:toggle')
   })
 

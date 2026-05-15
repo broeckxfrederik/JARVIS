@@ -71,10 +71,12 @@ const jarvisAPI = {
 
   toggleWindow: () => ipcRenderer.send('window:toggle'),
 
-  onHotkeyToggle: (cb: () => void) => {
-    const handler = () => cb()
-    ipcRenderer.on('hotkey:toggle', handler)
-    return () => ipcRenderer.removeListener('hotkey:toggle', handler)
+  hideWindow: () => ipcRenderer.send('window:hide'),
+
+  onOverlayVisible: (cb: (visible: boolean) => void) => {
+    const handler = (_: unknown, visible: boolean) => cb(visible)
+    ipcRenderer.on('overlay:visible', handler)
+    return () => ipcRenderer.removeListener('overlay:visible', handler)
   },
 
   // ─── Decorator ────────────────────────────────────────────────────────────

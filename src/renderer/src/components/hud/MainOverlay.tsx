@@ -11,7 +11,7 @@ export function MainOverlay() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [localInput, setLocalInput] = useState('')
 
-  // Enable/disable click-through based on visibility
+  // Sync click-through with visibility and focus the input when shown
   useEffect(() => {
     if (typeof window !== 'undefined' && window.jarvis) {
       if (jarvis.isVisible) {
@@ -48,6 +48,7 @@ export function MainOverlay() {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
+        window.jarvis?.hideWindow()
         jarvis.setVisible(false)
       }
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -58,9 +59,7 @@ export function MainOverlay() {
     [jarvis, handleSubmit]
   )
 
-  if (!jarvis.isVisible) {
-    return null
-  }
+  if (!jarvis.isVisible) return null
 
   const isStreaming = jarvis.state === 'thinking'
 
@@ -125,7 +124,7 @@ export function MainOverlay() {
 
           {/* Close button */}
           <button
-            onClick={() => jarvis.setVisible(false)}
+            onClick={() => { window.jarvis?.hideWindow(); jarvis.setVisible(false) }}
             style={{
               background: 'none',
               border: '1px solid rgba(0,212,255,0.3)',

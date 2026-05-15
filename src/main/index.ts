@@ -30,6 +30,8 @@ function applyEnvOverrides(config: AppConfig): AppConfig {
       gemini: {
         ...config.ai.gemini,
         apiKey: config.ai.gemini.apiKey || process.env.GEMINI_API_KEY || '',
+        // Auto-upgrade removed model names
+        model: config.ai.gemini.model === 'gemini-1.5-flash' ? 'gemini-2.0-flash' : config.ai.gemini.model,
       },
       groq: {
         ...config.ai.groq,
@@ -101,7 +103,7 @@ app.whenReady().then(async () => {
       overlayWindow.setIgnoreMouseEvents(false)
     }
     overlayVisible = !overlayVisible
-    overlayWindow.webContents.send('hotkey:toggle')
+    overlayWindow.webContents.send('overlay:visible', overlayVisible)
     hudWindow.webContents.send('hotkey:toggle')
   }
 
