@@ -44,19 +44,6 @@ export function useJarvis() {
     })
     cleanups.push(cleanDone)
 
-    // Hotkey toggle — main sends explicit boolean; renderer just applies it.
-    console.log('[useJarvis] registering onHotkeyToggle listener')
-    try { window.jarvis.rendererLog?.('useJarvis: registering onHotkeyToggle listener') } catch {}
-    const cleanHotkey = window.jarvis.onHotkeyToggle((visible: boolean) => {
-      const before = useJarvisStore.getState().isVisible
-      console.log(`[useJarvis] hotkey:toggle received. payload=${visible} isVisible BEFORE=${before}`)
-      try { window.jarvis.rendererLog?.(`hotkey:toggle received. payload=${visible} isVisible BEFORE=${before}`) } catch {}
-      if (isMountedRef.current) {
-        store.setVisible(visible)
-      }
-    })
-    cleanups.push(cleanHotkey)
-
     // Active provider (fires when query starts or fallback occurs)
     const cleanProvider = window.jarvis.onProviderActive((name) => {
       if (isMountedRef.current) store.setActiveProvider(name)
