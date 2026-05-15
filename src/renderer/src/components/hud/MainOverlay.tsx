@@ -11,15 +11,10 @@ export function MainOverlay() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [localInput, setLocalInput] = useState('')
 
-  // Enable/disable click-through based on visibility
+  // Focus input whenever the overlay becomes visible (main already manages click-through)
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.jarvis) {
-      if (jarvis.isVisible) {
-        window.jarvis.setClickThrough(false)
-        inputRef.current?.focus()
-      } else {
-        window.jarvis.setClickThrough(true)
-      }
+    if (jarvis.isVisible) {
+      inputRef.current?.focus()
     }
   }, [jarvis.isVisible])
 
@@ -58,10 +53,6 @@ export function MainOverlay() {
     },
     [jarvis, handleSubmit]
   )
-
-  if (!jarvis.isVisible) {
-    return null
-  }
 
   const isStreaming = jarvis.state === 'thinking'
 

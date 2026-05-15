@@ -73,12 +73,6 @@ const jarvisAPI = {
 
   hideWindow: () => ipcRenderer.send('window:hide'),
 
-  onHotkeyToggle: (cb: () => void) => {
-    const handler = () => cb()
-    ipcRenderer.on('hotkey:toggle', handler)
-    return () => ipcRenderer.removeListener('hotkey:toggle', handler)
-  },
-
   onOverlayVisible: (cb: (visible: boolean) => void) => {
     const handler = (_: unknown, visible: boolean) => cb(visible)
     ipcRenderer.on('overlay:visible', handler)
