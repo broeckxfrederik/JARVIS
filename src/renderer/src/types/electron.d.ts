@@ -15,6 +15,7 @@ declare global {
       speak: (text: string) => Promise<boolean>
       onWakeWord: (cb: () => void) => () => void
       onVoiceState: (cb: (state: string) => void) => () => void
+      sendAudioChunk: (buf: Buffer) => void
 
       // System
       executeCommand: (cmd: string) => Promise<{ stdout: string; stderr: string; exitCode: number | null; success: boolean }>

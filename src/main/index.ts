@@ -1,4 +1,4 @@
-import { app, globalShortcut, BrowserWindow } from 'electron'
+import { app, globalShortcut, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import log from 'electron-log'
 import { createOverlayWindow, createHUDWindow, createDecoratorWindow, createWidgetCanvasWindow } from './windowManager'
@@ -6,6 +6,7 @@ import { ConfigService } from './services/config/ConfigService'
 import { AIService } from './services/ai/AIService'
 import { TTSService } from './services/voice/TTSService'
 import { STTService } from './services/voice/STTService'
+import { WakeWordService } from './services/voice/WakeWordService'
 import { ShellService } from './services/system/ShellService'
 import { VolumeService } from './services/system/VolumeService'
 import { ScreenshotService } from './services/system/ScreenshotService'
@@ -44,6 +45,22 @@ app.whenReady().then(async () => {
   const appLaunchService = new AppLaunchService(config)
   const windowDecorator = new WindowDecorator(decoratorWindow, [hudWindow])
   const widgetManager = new WidgetManager(canvasWindow, config)
+
+  // Wake word detection — fires toggleOverlay and sends voice:wake-word to renderer
+  const wakeWordService = new WakeWordService(() => {
+    if (!overlayVisible) toggleOverlay()
+    for (const win of [overlayWindow, hudWindow]) {
+      if (!win.isDestroyed()) win.webContents.send('voice:wake-word')
+    }
+  })
+  wakeWordService.init().then((ok) => {
+    if (ok) log.info('[WakeWord] Ready')
+  })
+
+  // Forward raw PCM chunks from HUD renderer to the wake word spotter
+  ipcMain.on('voice:audio-chunk', (_event, buf: Buffer) => {
+    wakeWordService.processAudio(buf)
+  })
 
   let overlayVisible = false
 
@@ -136,6 +153,7 @@ app.whenReady().then(async () => {
   app.on('will-quit', () => {
     globalShortcut.unregisterAll()
     windowDecorator.stop()
+    wakeWordService.destroy()
   })
 
   app.on('window-all-closed', () => {

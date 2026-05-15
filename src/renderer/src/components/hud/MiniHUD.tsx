@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useJarvisStore } from '../../store/jarvisStore'
+import { useWakeWord } from '../../hooks/useWakeWord'
 
 const STATE_COLOR: Record<string, string> = {
   idle: 'rgba(0,212,255,0.4)',
@@ -13,6 +14,9 @@ export function MiniHUD() {
   const state = useJarvisStore((s) => s.state)
   const decoratorInfo = useJarvisStore((s) => s.decoratorInfo)
   const [time, setTime] = useState(() => new Date())
+
+  // Continuously capture mic audio and forward to main for wake word detection
+  useWakeWord()
 
   // Wire decorator updates from IPC
   useEffect(() => {
