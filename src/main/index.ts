@@ -1,5 +1,6 @@
 import { app, globalShortcut, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
+import { config as loadEnv } from 'dotenv'
 import log from 'electron-log'
 import { createOverlayWindow, createHUDWindow, createDecoratorWindow, createWidgetCanvasWindow } from './windowManager'
 import { ConfigService } from './services/config/ConfigService'
@@ -15,6 +16,32 @@ import { WindowDecorator } from './decorator/WindowDecorator'
 import { WidgetManager } from './widgets/WidgetManager'
 import { registerIpcHandlers } from './ipc/index'
 import { createTray } from './trayManager'
+import type { AppConfig } from './services/config/schema'
+
+// Load .env from project root — env vars act as fallbacks for unconfigured keys
+loadEnv()
+
+/** Overlay env-var values onto any config fields that are still empty strings. */
+function applyEnvOverrides(config: AppConfig): AppConfig {
+  return {
+    ...config,
+    ai: {
+      ...config.ai,
+      gemini: {
+        ...config.ai.gemini,
+        apiKey: config.ai.gemini.apiKey || process.env.GEMINI_API_KEY || '',
+      },
+      groq: {
+        ...config.ai.groq,
+        apiKey: config.ai.groq.apiKey || process.env.GROQ_API_KEY || '',
+      },
+    },
+    voice: {
+      ...config.voice,
+      picovoiceApiKey: config.voice.picovoiceApiKey || process.env.PICOVOICE_API_KEY || '',
+    },
+  }
+}
 
 log.initialize()
 log.info('JARVIS starting...')
@@ -27,7 +54,7 @@ if (!gotLock) {
 
 app.whenReady().then(async () => {
   const configService = new ConfigService()
-  const config = configService.get()
+  const config = applyEnvOverrides(configService.get())
 
   // Create windows
   const overlayWindow = createOverlayWindow()
