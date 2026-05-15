@@ -48,7 +48,7 @@ export function MainOverlay() {
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
-        jarvis.setVisible(false)
+        window.jarvis?.toggleWindow()
       }
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
@@ -125,7 +125,7 @@ export function MainOverlay() {
 
           {/* Close button */}
           <button
-            onClick={() => jarvis.setVisible(false)}
+            onClick={() => window.jarvis?.toggleWindow()}
             style={{
               background: 'none',
               border: '1px solid rgba(0,212,255,0.3)',
