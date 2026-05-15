@@ -146,16 +146,20 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
   ipcMain.on('window:toggle', () => {
     const visible = getOverlayVisible()
     if (visible) {
+      // Closing: send event BEFORE hiding so the renderer receives it reliably
+      overlayWindow.webContents.send('hotkey:toggle')
+      hudWindow.webContents.send('hotkey:toggle')
       overlayWindow.hide()
       overlayWindow.setIgnoreMouseEvents(true, { forward: true })
     } else {
+      // Opening: show first so the renderer is active when the event arrives
       overlayWindow.show()
       overlayWindow.focus()
       overlayWindow.setIgnoreMouseEvents(false)
+      overlayWindow.webContents.send('hotkey:toggle')
+      hudWindow.webContents.send('hotkey:toggle')
     }
     setOverlayVisible(!visible)
-    overlayWindow.webContents.send('hotkey:toggle')
-    hudWindow.webContents.send('hotkey:toggle')
   })
 
   // ─── Decorator ──────────────────────────────────────────────────────────────
