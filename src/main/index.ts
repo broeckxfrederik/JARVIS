@@ -42,7 +42,7 @@ app.whenReady().then(async () => {
   const volumeService = new VolumeService()
   const screenshotService = new ScreenshotService()
   const appLaunchService = new AppLaunchService(config)
-  const windowDecorator = new WindowDecorator(decoratorWindow)
+  const windowDecorator = new WindowDecorator(decoratorWindow, [hudWindow])
   const widgetManager = new WidgetManager(canvasWindow, config)
 
   let overlayVisible = false

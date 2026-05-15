@@ -24,4 +24,5 @@ export interface WidgetPayload {
   spec: WidgetSpec
   data?: WeatherData | { lat: number; lon: number; location: string } | null
   html?: string  // Ollama-generated HTML for custom type
+  _version?: number  // monotonic counter used by renderer to discard stale payloads
 }

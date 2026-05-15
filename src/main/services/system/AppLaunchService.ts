@@ -95,7 +95,9 @@ export class AppLaunchService {
       proc.on('error', () => {
         resolve({ success: false, message: `Failed to launch ${appName}` })
       })
-      resolve({ success: true, message: `Launching ${appName}...` })
+      proc.on('spawn', () => {
+        resolve({ success: true, message: `Launching ${appName}...` })
+      })
     })
   }
 
@@ -112,7 +114,9 @@ export class AppLaunchService {
       proc.on('error', () => {
         resolve({ success: false, message: `Failed to launch ${appName}` })
       })
-      resolve({ success: true, message: `Launching ${appName}...` })
+      proc.on('spawn', () => {
+        resolve({ success: true, message: `Launching ${appName}...` })
+      })
     })
   }
 
@@ -126,7 +130,9 @@ export class AppLaunchService {
       proc.on('error', () => {
         resolve({ success: false, message: `Failed to launch ${appName}` })
       })
-      resolve({ success: true, message: `Launching ${appName}...` })
+      proc.on('spawn', () => {
+        resolve({ success: true, message: `Launching ${appName}...` })
+      })
     })
   }
 }
