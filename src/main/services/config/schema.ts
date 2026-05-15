@@ -6,7 +6,7 @@ export const ConfigSchema = z.object({
     providerChain: z.array(z.enum(['gemini', 'groq', 'ollama'])).default(['gemini', 'groq', 'ollama']),
     gemini: z.object({
       apiKey: z.string().default(''),
-      model: z.string().default('gemini-1.5-flash'),
+      model: z.string().default('gemini-2.0-flash'),
     }).default({}),
     groq: z.object({
       apiKey: z.string().default(''),
