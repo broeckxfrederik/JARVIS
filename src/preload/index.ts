@@ -45,6 +45,8 @@ const jarvisAPI = {
     return () => ipcRenderer.removeListener('voice:state', handler)
   },
 
+  sendAudioChunk: (buf: Buffer) => ipcRenderer.send('voice:audio-chunk', buf),
+
   // ─── System ───────────────────────────────────────────────────────────────
 
   executeCommand: (cmd: string) => ipcRenderer.invoke('system:exec', cmd),
