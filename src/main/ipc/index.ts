@@ -143,6 +143,12 @@ export function registerIpcHandlers(deps: IpcHandlerDeps): void {
     overlayWindow.setIgnoreMouseEvents(enabled, { forward: true })
   })
 
+  ipcMain.on('window:hide', () => {
+    overlayWindow.hide()
+    overlayWindow.setIgnoreMouseEvents(true, { forward: true })
+    setOverlayVisible(false)
+  })
+
   ipcMain.on('window:toggle', () => {
     const visible = getOverlayVisible()
     if (visible) {

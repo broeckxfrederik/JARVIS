@@ -30,6 +30,7 @@ declare global {
       // Window
       setClickThrough: (enabled: boolean) => void
       toggleWindow: () => void
+      hideWindow: () => void
       onHotkeyToggle: (cb: () => void) => () => void
 
       // Decorator
