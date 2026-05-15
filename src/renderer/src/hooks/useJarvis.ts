@@ -44,12 +44,6 @@ export function useJarvis() {
     })
     cleanups.push(cleanDone)
 
-    // Explicit visibility state from main process — no inversion, no sync issues
-    const cleanVisible = window.jarvis.onOverlayVisible((visible) => {
-      if (isMountedRef.current) store.setVisible(visible)
-    })
-    cleanups.push(cleanVisible)
-
     // Active provider (fires when query starts or fallback occurs)
     const cleanProvider = window.jarvis.onProviderActive((name) => {
       if (isMountedRef.current) store.setActiveProvider(name)
