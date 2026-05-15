@@ -44,6 +44,15 @@ export function useJarvis() {
     })
     cleanups.push(cleanDone)
 
+    // Hotkey toggle — use getState() to avoid stale closure on isVisible
+    const cleanHotkey = window.jarvis.onHotkeyToggle(() => {
+      if (isMountedRef.current) {
+        const next = !useJarvisStore.getState().isVisible
+        store.setVisible(next)
+      }
+    })
+    cleanups.push(cleanHotkey)
+
     // Active provider (fires when query starts or fallback occurs)
     const cleanProvider = window.jarvis.onProviderActive((name) => {
       if (isMountedRef.current) store.setActiveProvider(name)

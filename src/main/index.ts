@@ -103,7 +103,7 @@ app.whenReady().then(async () => {
       overlayWindow.setIgnoreMouseEvents(false)
     }
     overlayVisible = !overlayVisible
-    overlayWindow.webContents.send('overlay:visible', overlayVisible)
+    overlayWindow.webContents.send('hotkey:toggle')
     hudWindow.webContents.send('hotkey:toggle')
   }
 
